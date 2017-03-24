@@ -107,17 +107,17 @@ def encode_string_map(d):
 
 
 def decode_int(b):
-    n = int.from_bytes(b[0:4], byteorder='big')
+    n = int.from_bytes(b[0:4], byteorder='big', signed=True)
     return n, b[4:]
 
 
 def decode_long(b):
-    n = int.from_bytes(b[0:8], byteorder='big')
+    n = int.from_bytes(b[0:8], byteorder='big', signed=True)
     return n, b[8:]
 
 
 def decode_short(b):
-    n = int.from_bytes(b[0:2], byteorder='big')
+    n = int.from_bytes(b[0:2], byteorder='big', signed=True)
     return n, b[2:]
 
 
@@ -312,6 +312,8 @@ class Cursor(object):
 
     def _convert_row(self, row):
         for i in range(len(row)):
+            if row[i] is None:
+                continue
             type_id = self.description[i][1]
             if type_id in (0x0000, 0x0001, 0x000D):     # string
                 row[i] = row[i].decode('utf-8')

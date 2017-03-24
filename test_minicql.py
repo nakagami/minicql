@@ -47,8 +47,9 @@ class TestMiniCQL(unittest.TestCase):
                 PRIMARY KEY(id)
             )
         """)
-        cur.execute("INSERT INTO test (id, s) VALUES (1, 'test1')")
-        cur.execute("INSERT INTO test (id, s) VALUES (2, 'あいうえお')")
+        cur.execute("INSERT INTO test (id, s) VALUES (1, NULL)")
+        cur.execute("INSERT INTO test (id, s) VALUES (2, 'test123')")
+        cur.execute("INSERT INTO test (id, s) VALUES (3, 'あいうえお')")
         conn.close()
 
 
@@ -56,7 +57,14 @@ class TestMiniCQL(unittest.TestCase):
         conn = minicql.connect(self.host, self.keyspace, port=self.port)
         cur = conn.cursor()
         cur.execute("SELECT * FROM test")
-        self.assertEqual(cur.fetchall(), [[1, 'test1'], [2, 'あいうえお']])
+        self.assertEqual(
+            cur.fetchall(),
+            [
+                [1, None],
+                [2, 'test123'],
+                [3, 'あいうえお'],
+            ]
+        )
         conn.close()
 
 
