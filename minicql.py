@@ -27,7 +27,7 @@
 import socket
 import struct
 
-VERSION = (0, 1, 0)
+VERSION = (0, 1, 1)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 threadsafety = 1
