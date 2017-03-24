@@ -31,6 +31,7 @@ import datetime
 
 import minicql
 
+
 def _recv_from_sock(sock, nbytes):
     n = nbytes
     recieved = b''
@@ -107,11 +108,10 @@ def read_frame(sock):
             b = b[2:]
             print('serial_consistency=', serial_consistency)
         if flags & 0x20:
-#            t = datetime.datetime.fromtimestamp(int.from_bytes(b[:8], byteorder='big', signed=False) / 1000)
             t = b[:8]
             b = b[8:]
             print('timestamp=', t)
-#        assert b == b''
+        assert b == b''
     elif opcode == 'ERROR':
         n, b = minicql.decode_int(body)
         s, b = minicql.decode_string(b)

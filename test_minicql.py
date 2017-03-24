@@ -23,10 +23,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ###############################################################################
-import sys
 import unittest
-import datetime
 import minicql
+
 
 class TestMiniCQL(unittest.TestCase):
     host = 'localhost'
@@ -51,7 +50,6 @@ class TestMiniCQL(unittest.TestCase):
         cur.execute("INSERT INTO test (id, s) VALUES (2, 'test123')")
         cur.execute("INSERT INTO test (id, s) VALUES (3, 'あいうえお')")
         conn.close()
-
 
     def test_cql(self):
         conn = minicql.connect(self.host, self.keyspace, port=self.port)

@@ -24,10 +24,8 @@
 
 # https://github.com/apache/cassandra/blob/trunk/doc/native_protocol_v5.spec
 
-import sys
 import socket
 import struct
-import binascii
 
 VERSION = (0, 1, 0)
 __version__ = '%s.%s.%s' % VERSION
@@ -88,14 +86,14 @@ def encode_integer(n, ln):
 def encode_string(s):
     b = s.encode('utf-8')
     if len(b) < 0xFFFF:
-        return encode_integer(len(b), 2)  + b
+        return encode_integer(len(b), 2) + b
     elif len(b) < 0xFFFFFFFF:
-        return encode_integer(len(b), 4)  + b
+        return encode_integer(len(b), 4) + b
 
 
 def encode_long_string(s):
     b = s.encode('utf-8')
-    return encode_integer(len(b), 4)  + b
+    return encode_integer(len(b), 4) + b
 
 
 def encode_string_map(d):
@@ -194,7 +192,7 @@ def decode_rows(body):
         column_name, b = decode_string(b)
         type_code, b = decode_short(b)
         sub_type = None
-        if type_code == 0x0000: # Custom
+        if type_code == 0x0000:     # Custom
             raise ValueError("Custom type still not support")
         elif type_code == 0x0020:   # List
             sub_type, b = decode_short(b)
@@ -220,7 +218,7 @@ def decode_rows(body):
     return description, rows, paging_state
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class Error(Exception):
     def __init__(self, code, message):
         self.code = code
@@ -403,7 +401,7 @@ class Connection:
 
     def _recv_frame(self):
         header = self._recv(9)
-        stream = int.from_bytes(header[2:4], byteorder='big')
+        # stream = int.from_bytes(header[2:4], byteorder='big')
         ln = int.from_bytes(header[-4:], byteorder='big')
         body = self._recv(ln)
         opcode = header[4]
@@ -454,7 +452,6 @@ class Connection:
 
     def cursor(self):
         return Cursor(self)
-
 
     def close(self):
         self._sock.close()
