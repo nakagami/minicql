@@ -20,5 +20,5 @@ Example
    cur.execute("select * from test")
    for c in cur.fetchall():
        print(c)
-       conn.close()
+   conn.close()
 
