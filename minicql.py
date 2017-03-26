@@ -382,7 +382,7 @@ class Cursor(object):
             elif type_id in (0x0012, ):     # Time
                 pass    # TODO:
 
-        return row
+        return tuple(row)
 
     def fetchone(self):
         if not self.connection or not self.connection.is_connect():

@@ -60,9 +60,9 @@ class TestMiniCQL(unittest.TestCase):
         self.assertEqual(
             cur.fetchall(),
             [
-                [1, None, decimal.Decimal('123.4'), 123.4, 1.0],
-                [2, 'test123', decimal.Decimal('1234.0'), 1234.0, 0.125],
-                [3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125],
+                (1, None, decimal.Decimal('123.4'), 123.4, 1.0),
+                (2, 'test123', decimal.Decimal('1234.0'), 1234.0, 0.125),
+                (3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125),
             ]
         )
 
@@ -72,7 +72,7 @@ class TestMiniCQL(unittest.TestCase):
         )
         self.assertEqual(
             cur.fetchall(),
-            [[1, None, decimal.Decimal('123.4'), 123.4, 1.0]]
+            [(1, None, decimal.Decimal('123.4'), 123.4, 1.0)]
         )
         cur.execute(
             "SELECT id, s, dec, d, f FROM test_basic_type WHERE s=%s ALLOW FILTERING",
@@ -80,7 +80,33 @@ class TestMiniCQL(unittest.TestCase):
         )
         self.assertEqual(
             cur.fetchall(),
-            [[3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125]]
+            [(3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125)]
+        )
+
+        conn.close()
+
+    def test_var_type(self):
+        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        cur = conn.cursor()
+        try:
+            cur.execute("drop table test_var_type")
+        except:
+            pass
+        cur.execute("""
+            CREATE TABLE test_var_type (
+                id VARINT,
+                s VARCHAR,
+                PRIMARY KEY(id)
+            )
+        """)
+        cur.execute("INSERT INTO test_var_type (id, s) VALUES (1, NULL)")
+        cur.execute("INSERT INTO test_var_type (id, s) VALUES (2, 'test123')")
+        cur.execute("INSERT INTO test_var_type (id, s) VALUES (3, 'あいうえお')")
+
+        cur.execute("SELECT id, s FROM test_var_type")
+        self.assertEqual(
+            set(cur.fetchall()),
+            set([(1, None), (2, 'test123'), (3, 'あいうえお')])
         )
 
         conn.close()
