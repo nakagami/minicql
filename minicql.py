@@ -315,12 +315,27 @@ class Cursor(object):
             type_id = self.description[i][1]
             if type_id in (0x0000, 0x0001, 0x000D):     # string
                 row[i] = row[i].decode('utf-8')
-            elif type_id in (0x0002, 0x0005, 0x0009):     # integer
+            elif type_id in (0x0002, 0x0005, 0x0009, 0x000E, 0x0013, 0x0014):   # integer
                 row[i] = int.from_bytes(row[i], byteorder='big')
             elif type_id in (0x0003, ):     # binary
                 pass
-            elif type_id in (0x0004, ):       # bool
+            elif type_id in (0x0004, ):     # bool
                 row[i] = bool(int.from_bytes(row[i], byteorder='big'))
+            elif type_id in (0x0006, ):     # decimal
+                pass    # TODO:
+            elif type_id in (0x0007, ):     # double
+                pass    # TODO:
+            elif type_id in (0x0008, ):     # double
+                pass    # TODO:
+            elif type_id in (0x000B, ):     # Timestamp
+                pass    # TODO:
+            elif type_id in (0x000C, ):     # UUID
+                pass    # TODO:
+            elif type_id in (0x0011, ):     # Date
+                pass    # TODO:
+            elif type_id in (0x0012, ):     # Time
+                pass    # TODO:
+
         return row
 
     def fetchone(self):
