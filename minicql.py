@@ -109,6 +109,13 @@ def encode_string_map(d):
     return b
 
 
+def decode_varint(b):
+    n = int(binascii.b2a_hex(b).decode('utf-8'), 16)
+    if b[0] & 0x80:
+        n -= 1 << (len(b) * 8)
+    return n
+
+
 def decode_int(b):
     n = int.from_bytes(b[0:4], byteorder='big', signed=True)
     return n, b[4:]
@@ -359,11 +366,13 @@ class Cursor(object):
             elif type_id in (0x0004, ):     # bool
                 row[i] = bool(int.from_bytes(row[i], byteorder='big'))
             elif type_id in (0x0006, ):     # decimal
-                pass    # TODO:
+                scale = int.from_bytes(row[i][:4], byteorder='big', signed=True)
+                unscaled = decode_varint(row[i][4:])
+                row[i] = decimal.Decimal('%de%d' % (unscaled, -scale))
             elif type_id in (0x0007, ):     # double
-                pass    # TODO:
+                row[i] = struct.unpack('>d', row[i])[0]
             elif type_id in (0x0008, ):     # double
-                pass    # TODO:
+                row[i] = struct.unpack('>f', row[i])[0]
             elif type_id in (0x000B, ):     # Timestamp
                 pass    # TODO:
             elif type_id in (0x000C, ):     # UUID
