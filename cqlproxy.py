@@ -111,7 +111,6 @@ def read_frame(sock):
             t = b[:8]
             b = b[8:]
             print('timestamp=', t)
-        assert b == b''
     elif opcode == 'ERROR':
         n, b = minicql.decode_int(body)
         s, b = minicql.decode_string(b)
