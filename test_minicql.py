@@ -63,6 +63,13 @@ class TestMiniCQL(unittest.TestCase):
                 [3, 'あいうえお'],
             ]
         )
+
+        cur.execute("SELECT * FROM test WHERE id=%s ALLOW FILTERING", (1,))
+        self.assertEqual(cur.fetchall(), [[1, None]])
+        cur.execute("SELECT * FROM test WHERE s=%s ALLOW FILTERING", ('あいうえお',))
+        self.assertEqual(cur.fetchall(), [[3, 'あいうえお']])
+
+
         conn.close()
 
 

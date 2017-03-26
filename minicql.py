@@ -26,12 +26,17 @@
 
 import socket
 import struct
+import decimal
+import datetime
+import time
+import binascii
+import uuid
 
-VERSION = (0, 1, 1)
+VERSION = (0, 2, 0)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 threadsafety = 1
-paramstyle = 'qmark'
+paramstyle = 'format'
 
 # protocol version
 REQUEST_PROTOCOL_VERSION = 0x04
@@ -218,6 +223,31 @@ def decode_rows(body):
     return description, rows, paging_state
 
 
+def escape_parameter(v):
+    if v is None:
+        return 'NULL'
+
+    t = type(v)
+    if t == str:
+        return u"'" + v.replace(u"'", u"''") + u"'"
+    elif t == bool:
+        return u"TRUE" if v else u"FALSE"
+    elif t == time.struct_time:
+        return u'%04d-%02d-%02d %02d:%02d:%02d' % (
+            v.tm_year, v.tm_mon, v.tm_mday, v.tm_hour, v.tm_min, v.tm_sec)
+    elif t == datetime.datetime:
+        return "timestamp '" + v.isoformat() + "'"
+    elif t == datetime.date:
+        return "date '" + str(v) + "'"
+    elif t == datetime.timedelta:
+        return u"interval '" + str(v) + "'"
+    elif t == int or t == float:
+        return str(v)
+    elif t == decimal.Decimal:
+        return "decimal '" + str(v) + "'"
+    else:
+        return "'" + str(v) + "'"
+
 # ------------------------------------------------------------------------------
 class Error(Exception):
     def __init__(self, code, message):
@@ -294,11 +324,18 @@ class Cursor(object):
         pass
 
     def execute(self, query, args=()):
-        self.query = query
         if not self.connection or not self.connection.is_connect():
             raise ProgrammingError("Lost connection")
 
-        self.description, self._rows = self.connection._execute(query, args)
+        self.description = []
+        self.args = args
+        if args:
+            escaped_args = tuple(escape_parameter(arg).replace('%', '%%') for arg in args)
+            query = query.replace('%', '%%').replace('%%s', '%s')
+            query = query % escaped_args
+            query = query.replace('%%', '%')
+        self.query = query
+        self.description, self._rows = self.connection._execute(query)
         self._rowcount = len(self._rows)
 
     def executemany(self, query, seq_of_params):
@@ -426,7 +463,7 @@ class Connection:
             raise OperationalError(n, s)
         return opcode, body
 
-    def _execute(self, query, params=()):
+    def _execute(self, query):
         body = encode_long_string(query) + b'\x00\x01\x00'
         self._send_frame(OP_QUERY, body)
         opcode, body = self._recv_frame()
