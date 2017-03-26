@@ -25,6 +25,7 @@
 import unittest
 import minicql
 import decimal
+import uuid
 
 
 class TestMiniCQL(unittest.TestCase):
@@ -108,6 +109,45 @@ class TestMiniCQL(unittest.TestCase):
             set(cur.fetchall()),
             set([(1, None), (2, 'test123'), (3, 'あいうえお')])
         )
+
+        conn.close()
+
+    def test_uuid(self):
+        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        cur = conn.cursor()
+        try:
+            cur.execute("drop table test_uuid_type")
+        except:
+            pass
+        cur.execute("""
+            CREATE TABLE test_uuid_type (
+                id UUID,
+                PRIMARY KEY(id)
+            )
+        """)
+        cur.execute("INSERT INTO test_uuid_type (id) VALUES (now())")
+
+        cur.execute("SELECT id FROM test_uuid_type")
+        self.assertTrue(isinstance(cur.fetchone()[0], uuid.UUID))
+
+        conn.close()
+
+    def test_date_time_type(self):
+        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        cur = conn.cursor()
+        try:
+            cur.execute("drop table test_date_time_type")
+        except:
+            pass
+        cur.execute("""
+            CREATE TABLE test_date_time_type (
+                id INT,
+                dt timestamp,
+                d date,
+                t time,
+                PRIMARY KEY(id)
+            )
+        """)
 
         conn.close()
 
