@@ -32,15 +32,15 @@ class TestMiniCQL(unittest.TestCase):
     keyspace = 'test'
     port = 9042
 
-    def setUp(self):
+    def test_basic_type(self):
         conn = minicql.connect(self.host, self.keyspace, port=self.port)
         cur = conn.cursor()
         try:
-            cur.execute("drop table test")
+            cur.execute("drop table test_basic_type")
         except:
             pass
         cur.execute("""
-            CREATE TABLE test (
+            CREATE TABLE test_basic_type (
                 id INT,
                 s TEXT,
                 dec decimal,
@@ -49,18 +49,14 @@ class TestMiniCQL(unittest.TestCase):
                 PRIMARY KEY(id)
             )
         """)
-        cur.execute("""INSERT INTO test (id, s, dec, d, f)
+        cur.execute("""INSERT INTO test_basic_type (id, s, dec, d, f)
             VALUES (1, NULL, 123.4, 123.4, 1.0)""")
-        cur.execute("""INSERT INTO test (id, s, dec, d, f)
+        cur.execute("""INSERT INTO test_basic_type (id, s, dec, d, f)
             VALUES (2, 'test123', 1234.0, 1234.0, 0.125)""")
-        cur.execute("""INSERT INTO test (id, s, dec, d, f)
+        cur.execute("""INSERT INTO test_basic_type (id, s, dec, d, f)
             VALUES (3, 'あいうえお', -0.123, -0.123, -0.125)""")
-        conn.close()
 
-    def test_cql(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port)
-        cur = conn.cursor()
-        cur.execute("SELECT id, s, dec, d, f FROM test")
+        cur.execute("SELECT id, s, dec, d, f FROM test_basic_type")
         rs = cur.fetchall()
         self.assertEqual(
             rs,
@@ -71,11 +67,22 @@ class TestMiniCQL(unittest.TestCase):
             ]
         )
 
-        cur.execute("SELECT id, s, dec, d, f FROM test WHERE id=%s ALLOW FILTERING", (1,))
-        self.assertEqual(cur.fetchall(), [[1, None, decimal.Decimal('123.4'), 123.4, 1.0]])
-        cur.execute("SELECT id, s, dec, d, f FROM test WHERE s=%s ALLOW FILTERING", ('あいうえお',))
-        self.assertEqual(cur.fetchall(), [[3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125]])
-
+        cur.execute(
+            "SELECT id, s, dec, d, f FROM test_basic_type WHERE id=%s ALLOW FILTERING",
+            (1,)
+        )
+        self.assertEqual(
+            cur.fetchall(),
+            [[1, None, decimal.Decimal('123.4'), 123.4, 1.0]]
+        )
+        cur.execute(
+            "SELECT id, s, dec, d, f FROM test_basic_type WHERE s=%s ALLOW FILTERING",
+            ('あいうえお',)
+        )
+        self.assertEqual(
+            cur.fetchall(),
+            [[3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125]]
+        )
 
         conn.close()
 
