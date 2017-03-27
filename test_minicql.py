@@ -26,6 +26,7 @@ import unittest
 import minicql
 import decimal
 import uuid
+import datetime
 
 
 class TestMiniCQL(unittest.TestCase):
@@ -148,6 +149,14 @@ class TestMiniCQL(unittest.TestCase):
                 PRIMARY KEY(id)
             )
         """)
+        cur.execute("""INSERT INTO test_date_time_type (id, dt, d, t)
+            VALUES (1, '1967-08-11 12:34:56', '1967-08-11', '12:34:56.123456')""")
+
+        cur.execute("SELECT dt, d, t FROM test_date_time_type")
+        r = cur.fetchone()
+        self.assertEqual(r[0], datetime.datetime(1967, 8, 11, 12, 34, 56))
+        self.assertEqual(r[1], datetime.date(1967, 8, 11))
+        self.assertEqual(r[2], datetime.time(12, 34, 56, 123456))
 
         conn.close()
 

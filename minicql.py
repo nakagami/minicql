@@ -374,13 +374,22 @@ class Cursor(object):
             elif type_id in (0x0008, ):     # double
                 row[i] = struct.unpack('>f', row[i])[0]
             elif type_id in (0x000B, ):     # Timestamp
-                pass    # TODO:
+                row[i] = datetime.datetime.fromtimestamp(
+                    int.from_bytes(row[i], byteorder='big', signed=True) / 1000
+                )
             elif type_id in (0x000C, 0x000F):     # UUID
                 row[i] = uuid.UUID(bytes=row[i])
             elif type_id in (0x0011, ):     # Date
-                pass    # TODO:
+                days = int.from_bytes(row[i], byteorder='big') - 2 ** 31
+                dt = datetime.datetime(1970, 1, 1) + datetime.timedelta(days=days)
+                row[i] = datetime.date(dt.year, dt.month, dt.day)
             elif type_id in (0x0012, ):     # Time
-                pass    # TODO:
+                nanosec = int.from_bytes(row[i], byteorder='big')
+                microsecond = nanosec // 1000 % 1000000
+                second = nanosec // 1000000000 % 60
+                minute = nanosec // (60 * 1000000000) % 60
+                hour = nanosec // (3600 * 1000000000)
+                row[i] = datetime.time(hour, minute, second, microsecond)
 
         return tuple(row)
 
