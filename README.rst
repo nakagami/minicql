@@ -2,7 +2,7 @@
 minicql
 =========
 
-Python CQL (cassandra) database driver.
+Yet another Cassandra (CQL protocol) database driver.
 
 Requirement
 --------------
