@@ -2,7 +2,7 @@
 ###############################################################################
 # MIT License
 #
-# Copyright (c) 2017 Hajime Nakagami
+# Copyright (c) 2017,2020 Hajime Nakagami
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -67,13 +67,12 @@ def read_frame(sock):
     ln = int.from_bytes(header[-4:], byteorder='big')
     body = _recv_from_sock(sock, ln)
     opcode = OPCODE[header[4]]
-    assert header[0] == 0x04 or header[0] == 0x84
     if header[0] == 0x04:
         version = 'C->S'
     elif header[0] == 0x84:
         version = 'S->C'
     else:
-        raise ValueError('Invalid version:' + hex(header[0]))
+        version = hex(header[0])
     print('%s:flags=%d:stream=%d:%s:len=%d' % (version, header[1], stream, opcode, ln), end=' ')
     if opcode == 'STARTUP':
         d, b = minicql.decode_string_map(body)
