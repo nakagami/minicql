@@ -487,6 +487,11 @@ class Connection:
         self._send_frame(OP_QUERY, body)
         opcode, body = self._recv_frame()
         kind, b = decode_int(body)
+        assert opcode == OP_RESULT
+        if kind == 0x0001000d:
+            # ??? Azure Cosmos DB has unknown prefix bytes
+            body = body[29:]
+            kind, b = decode_int(body)
         if kind == 2:
             description, data, more_data = decode_rows(body)
         else:

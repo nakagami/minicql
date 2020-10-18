@@ -75,12 +75,12 @@ class TestMiniCQL(unittest.TestCase):
 
         cur.execute("SELECT id, s, dec, d, f FROM test_basic_type")
         self.assertEqual(
-            cur.fetchall(),
-            [
+            set(cur.fetchall()),
+            set([
                 (1, None, decimal.Decimal('123.4'), 123.4, 1.0),
                 (2, 'test123', decimal.Decimal('1234.0'), 1234.0, 0.125),
                 (3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125),
-            ]
+            ])
         )
 
         cur.execute(
