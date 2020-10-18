@@ -478,6 +478,10 @@ class Connection:
         opcode = header[4]
         if opcode == OP_ERROR:
             n, b = decode_int(body)
+            if n == 0x0001000d:
+                # ??? Azure Cosmos DB has unknown prefix bytes
+                body = body[29:]
+                n, b = decode_int(body)
             s, b = decode_string(b)
             raise OperationalError(n, s)
         return opcode, body
