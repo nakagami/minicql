@@ -31,14 +31,27 @@ import datetime
 
 class TestMiniCQL(unittest.TestCase):
     host = 'localhost'
-    keyspace = 'test'
+    keyspace = 'test_minicql'
     user = "cassandra"
     password = "cassandra"
     port = 9042
+    use_ssl = False
+
+    def setUp(self):
+        self.conn = minicql.connect(
+            self.host,
+            self.keyspace,
+            port=self.port,
+            user=self.user,
+            password=self.password,
+            use_ssl=self.use_ssl,
+        )
+
+    def tearDown(self):
+        self.conn.close()
 
     def test_basic_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
-        cur = conn.cursor()
+        cur = self.conn.cursor()
         try:
             cur.execute("drop table test_basic_type")
         except:
@@ -87,11 +100,8 @@ class TestMiniCQL(unittest.TestCase):
             [(3, 'あいうえお', decimal.Decimal('-0.123'), -0.123, -0.125)]
         )
 
-        conn.close()
-
     def test_var_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
-        cur = conn.cursor()
+        cur = self.conn.cursor()
         try:
             cur.execute("drop table test_var_type")
         except:
@@ -113,11 +123,8 @@ class TestMiniCQL(unittest.TestCase):
             set([(1, None), (2, 'test123'), (3, 'あいうえお')])
         )
 
-        conn.close()
-
     def test_uuid(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
-        cur = conn.cursor()
+        cur = self.conn.cursor()
         try:
             cur.execute("drop table test_uuid_type")
         except:
@@ -133,11 +140,8 @@ class TestMiniCQL(unittest.TestCase):
         cur.execute("SELECT id FROM test_uuid_type")
         self.assertTrue(isinstance(cur.fetchone()[0], uuid.UUID))
 
-        conn.close()
-
     def test_date_time_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
-        cur = conn.cursor()
+        cur = self.conn.cursor()
         try:
             cur.execute("drop table test_date_time_type")
         except:
@@ -159,8 +163,6 @@ class TestMiniCQL(unittest.TestCase):
         self.assertEqual(r[0], datetime.datetime(1967, 8, 11, 12, 34, 56))
         self.assertEqual(r[1], datetime.date(1967, 8, 11))
         self.assertEqual(r[2], datetime.time(12, 34, 56, 123456))
-
-        conn.close()
 
 
 if __name__ == "__main__":
