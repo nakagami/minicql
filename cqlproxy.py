@@ -74,15 +74,19 @@ def read_frame(sock):
     else:
         version = hex(header[0])
     print('%s:flags=%d:stream=%d:%s:len=%d' % (version, header[1], stream, opcode, ln), end=' ')
-    if opcode == 'STARTUP':
+    if opcode == 'ERROR':
+        n, b = minicql.decode_int(body)
+        s, b = minicql.decode_string(b)
+        print('%s:"%s"' % (hex(n), s))
+    elif opcode == 'STARTUP':
         d, b = minicql.decode_string_map(body)
         print(d)
+    elif opcode == 'AUTHENTICATE':
+        s, _ = minicql.decode_string(body)
+        print(binascii.b2a_hex(body).decode('utf-8'), s)
     elif opcode == 'SUPPORTED':
         d, b = minicql.decode_string_multimap(body)
         print(d)
-    elif opcode == 'REGISTER':
-        r, b = minicql.decode_string_list(body)
-        print(r)
     elif opcode == 'QUERY':
         query, b = minicql.decode_long_string(body)
         consistency = int.from_bytes(b[:2], byteorder='big')
@@ -110,10 +114,6 @@ def read_frame(sock):
             t = b[:8]
             b = b[8:]
             print('timestamp=', t)
-    elif opcode == 'ERROR':
-        n, b = minicql.decode_int(body)
-        s, b = minicql.decode_string(b)
-        print('%s:"%s"' % (hex(n), s))
     elif opcode == 'RESULT':
         kind, b = minicql.decode_int(body)
         if kind == 2:
@@ -124,6 +124,13 @@ def read_frame(sock):
         else:
             print('kind=%d' % (kind,))
             print(b)
+    elif opcode == 'REGISTER':
+        r, b = minicql.decode_string_list(body)
+        print(r)
+    elif opcode == 'AUTH_RESPONSE':
+        u, p = body[5:].split(b'\x00')
+        print(binascii.b2a_hex(body).decode('utf-8'), end=' ')
+        print("user={},password={}".format(u.decode('utf-8'), p.decode('utf-8')))
     else:
         print(binascii.b2a_hex(body).decode('utf-8'))
     return header + body
