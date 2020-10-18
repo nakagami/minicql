@@ -32,10 +32,12 @@ import datetime
 class TestMiniCQL(unittest.TestCase):
     host = 'localhost'
     keyspace = 'test'
+    user = "cassandra"
+    password = "cassandra"
     port = 9042
 
     def test_basic_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
         cur = conn.cursor()
         try:
             cur.execute("drop table test_basic_type")
@@ -88,7 +90,7 @@ class TestMiniCQL(unittest.TestCase):
         conn.close()
 
     def test_var_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
         cur = conn.cursor()
         try:
             cur.execute("drop table test_var_type")
@@ -114,7 +116,7 @@ class TestMiniCQL(unittest.TestCase):
         conn.close()
 
     def test_uuid(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
         cur = conn.cursor()
         try:
             cur.execute("drop table test_uuid_type")
@@ -134,7 +136,7 @@ class TestMiniCQL(unittest.TestCase):
         conn.close()
 
     def test_date_time_type(self):
-        conn = minicql.connect(self.host, self.keyspace, port=self.port)
+        conn = minicql.connect(self.host, self.keyspace, port=self.port, user=self.user, password=self.password)
         cur = conn.cursor()
         try:
             cur.execute("drop table test_date_time_type")

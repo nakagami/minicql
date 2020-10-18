@@ -493,10 +493,12 @@ class Connection:
 
         return description, data
 
-    def __init__(self, host, keyspace, port):
+    def __init__(self, host, keyspace, port, user, password):
         self.host = host
         self.keyspace = keyspace
         self.port = port
+        self.user = user
+        self.password = password
         self.stream_number = 0
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._sock.connect((self.host, self.port))
@@ -507,9 +509,21 @@ class Connection:
         supported_params, _ = decode_string_multimap(body)
         body = encode_string_map({'CQL_VERSION': supported_params['CQL_VERSION'][0]})
         self._send_frame(OP_STARTUP, body)
-        opcode, _ = self._recv_frame()
-        assert opcode == OP_READY
-        self._execute("use " + keyspace)
+        opcode, body = self._recv_frame()
+
+        if opcode == OP_AUTHENTICATE:
+            if not (self.user and self.password):
+                raise ValueError("Need credentials")
+            body = b'\x00' + self.user.encode('utf-8') + b'\x00' + self.password.encode('utf-8')
+            body = encode_integer(len(body), 4) + body
+            self._send_frame(OP_AUTH_RESPONSE, body)
+            opcode, _ = self._recv_frame()
+            assert opcode == OP_AUTH_SUCCESS
+        else:
+            assert opcode == OP_READY
+
+        if self.keyspace:
+            self._execute("use " + keyspace)
 
     def __enter__(self):
         return self
@@ -528,5 +542,5 @@ class Connection:
         self._sock = None
 
 
-def connect(host, keyspace, port=9042):
-    return Connection(host, keyspace, port)
+def connect(host, keyspace=None, port=9042, user=None, password=None):
+    return Connection(host, keyspace, port, user, password)
