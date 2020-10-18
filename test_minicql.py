@@ -135,7 +135,7 @@ class TestMiniCQL(unittest.TestCase):
                 PRIMARY KEY(id)
             )
         """)
-        cur.execute("INSERT INTO test_uuid_type (id) VALUES (now())")
+        cur.execute("INSERT INTO test_uuid_type (id) VALUES (uuid())")
 
         cur.execute("SELECT id FROM test_uuid_type")
         self.assertTrue(isinstance(cur.fetchone()[0], uuid.UUID))
