@@ -375,9 +375,9 @@ class Cursor(object):
             elif type_id in (0x0008, ):     # double
                 row[i] = struct.unpack('>f', row[i])[0]
             elif type_id in (0x000B, ):     # Timestamp
-                row[i] = datetime.datetime.fromtimestamp(
+                row[i] = datetime.datetime.utcfromtimestamp(
                     int.from_bytes(row[i], byteorder='big', signed=True) / 1000
-                )
+                ).replace(tzinfo=datetime.timezone.utc)
             elif type_id in (0x000C, 0x000F):     # UUID
                 row[i] = uuid.UUID(bytes=row[i])
             elif type_id in (0x0011, ):     # Date
