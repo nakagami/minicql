@@ -12,6 +12,8 @@ Requirement
 Example
 -------------
 
+Simple example
+
 ::
 
    import minicql
@@ -21,4 +23,19 @@ Example
    for c in cur.fetchall():
        print(c)
    conn.close()
+
+Use Cosmos DB cassandra API
+
+::
+
+   import minicql
+   conn = minicql.connect(
+       'xxxxx.cassandra.cosmos.azure.com',
+       'keyspace',
+       user='xxxxx',
+       password='?????',
+       port=10350,
+       use_ssl=True
+   )
+       ...
 
