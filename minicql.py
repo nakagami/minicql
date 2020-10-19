@@ -33,7 +33,7 @@ import time
 import binascii
 import uuid
 
-VERSION = (0, 2, 0)
+VERSION = (0, 3, 0)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 threadsafety = 1
