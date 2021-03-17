@@ -20,4 +20,6 @@ jobs:
         options: --health-cmd "cqlsh --debug" --health-interval 5s --health-retries 10
     steps:
     - uses: actions/checkout@v2
-    - run: python test_minicql.py
+    - run: docker ps
+    - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 --execute="describe keyspaces;"
+#    - run: python test_minicql.py
