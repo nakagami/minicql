@@ -10,20 +10,14 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
-    name: Setup
+  test:
     runs-on: ubuntu-latest
+    services:
+      cassandra:
+        image: cassandra
+        ports:
+          - 9042:9042
+        options: --health-cmd "cqlsh --debug" --health-interval 5s --health-retries 10
     steps:
     - uses: actions/checkout@v2
-    - name: Start Cassandra
-      uses: fabasoad/setup-cassandra-action@v1.0.0
-      with:
-        host: 'localhost'
-        port: 9042
-        username: cassandra
-        password: cassandra
-        connect-timeout: 30
-        keyspace: test_minicql
-    - name: Test
-      run: python test_minicql.py
+    - run: python test_minicql.py
