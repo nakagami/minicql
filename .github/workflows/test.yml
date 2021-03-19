@@ -24,4 +24,4 @@ jobs:
     - run: docker cp misc/create_test_schema.cql ${{ job.services.cassandra.id }}:/
     - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 -f /create_test_schema.cql
     - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 --execute="describe keyspaces;"
-#    - run: python test_minicql.py
+    - run: python test_minicql.py
