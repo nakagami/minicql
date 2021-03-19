@@ -21,6 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: docker ps
-    - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 --execute="CREATE KEYSPACE test_minicql;"
+    - run: docker cp misc/create_test_schema.sql ${{ job.services.cassandra.id }}:/
+    - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 -f /create_test_schema.sql"
     - run: docker exec ${{ job.services.cassandra.id }} cqlsh --debug localhost 9042 --execute="describe keyspaces;"
 #    - run: python test_minicql.py
